@@ -38,6 +38,14 @@ func main() {
 		    "whoami":name +" "+nif,
         })
 	})
+
+    router.GET("/info", func(c *gin.Context) {
+        res := make (chan string)
+        h.info <- res
+        info := <- res
+        c.String(200, "%v",info)
+	})
+
     router.GET("/ws", func(c *gin.Context) {
         serveWs(c.Writer, c.Request)
     })
