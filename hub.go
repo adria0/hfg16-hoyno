@@ -19,7 +19,7 @@ type hub struct {
 	// Unregister requests from connections.
 	unregister chan *connection
 
-    info chan chan string
+	info chan chan string
 }
 
 var h = hub{
@@ -27,7 +27,7 @@ var h = hub{
 	register:    make(chan *connection),
 	unregister:  make(chan *connection),
 	connections: make(map[*connection]bool),
-    info:        make(chan chan string),
+	info:        make(chan chan string),
 }
 
 func (h *hub) run() {
@@ -49,12 +49,12 @@ func (h *hub) run() {
 					delete(h.connections, c)
 				}
 			}
-        case ch:= <- h.info:
-            info := ""
-            for k,_ := range(h.connections) {
-                info = info + k.ws.RemoteAddr().String()+" "+k.nick+"\n"
-            }
-            ch<-info
-        }
+		case ch := <-h.info:
+			info := ""
+			for k, _ := range h.connections {
+				info = info + k.ws.RemoteAddr().String() + " " + k.nick + "\n"
+			}
+			ch <- info
+		}
 	}
 }

@@ -5,12 +5,12 @@
 package main
 
 import (
+	"bytes"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"strings"
 	"time"
-    "strings"
-    "bytes"
 )
 
 const (
@@ -34,17 +34,17 @@ var upgrader = websocket.Upgrader{
 
 // connection is an middleman between the websocket connection and the hub.
 type connection struct {
-   // The websocket connection.
+	// The websocket connection.
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
 	send chan []byte
 
-    // Name
-    nick string
+	// Name
+	nick string
 
-    // Authentication
-    nif string
+	// Authentication
+	nif string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -64,10 +64,10 @@ func (c *connection) readPump() {
 			}
 			break
 		}
-        var buffer bytes.Buffer
-        buffer.WriteString(c.nick)
-        buffer.WriteString(">")
-        buffer.Write(message)
+		var buffer bytes.Buffer
+		buffer.WriteString(c.nick)
+		buffer.WriteString(">")
+		buffer.Write(message)
 		h.broadcast <- buffer.Bytes()
 	}
 }
@@ -111,19 +111,18 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    name := "TU"
-    nif := ""
+	name := "TU"
+	nif := ""
 
-    if len(r.TLS.PeerCertificates)>0 {
-        cn := r.TLS.PeerCertificates[0].Subject.CommonName
-        split := strings.Split(cn, " - NIF ")
-        name = strings.Replace(split[0],"NOMBRE ","",1)
-        nif = split[1]
-    }
+	if len(r.TLS.PeerCertificates) > 0 {
+		cn := r.TLS.PeerCertificates[0].Subject.CommonName
+		split := strings.Split(cn, " - NIF ")
+		name = strings.Replace(split[0], "NOMBRE ", "", 1)
+		nif = split[1]
+	}
 
-    c := &connection{send: make(chan []byte, 256), ws: ws, nick:name, nif: nif}
+	c := &connection{send: make(chan []byte, 256), ws: ws, nick: name, nif: nif}
 	h.register <- c
 	go c.writePump()
 	c.readPump()
 }
-

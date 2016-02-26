@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HoyNO</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css"  href="/static/css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+       <h1 class="logo">HoyNO</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+
+<form class="form-horizontal" method="post" action="/config">
+<fieldset>
+
+<!-- Form Name -->
+<legend>Mis datos</legend>
+
+<div class="form-group">
+  <label class="col-md-4 control-label" for="data">Nombre interno</label>
+  <div class="col-md-8">
+    <input class="form-control" type="text" name="UserName" value="{{ .user.UserName }}">
+  </div>
+  <label class="col-md-4 control-label" for="data">Nombre publico (el que veran los usuarios)</label>
+  <div class="col-md-8">
+    <input class="form-control" type="text" name="PublicName" value="{{ .user.PublicName }}">
+  </div>
+  <label class="col-md-4 control-label" for="data">Correo electronico</label>
+  <div class="col-md-8">
+    <input class="form-control" type="text" name="Email" value="{{ .user.Email }}">
+  </div>
+</div>
+<br>
+<legend>Mi grupo</legend> 
+
+<!-- Textarea -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="data">Nombre del grupo (dejalo en blanco si no quieres tener ninguno propio)</label>
+  <div class="col-md-8">
+    <input class="form-control" type="text" name="GroupName" value="{{ .user.GroupName }}">
+  </div>
+</div>
+<!-- Textarea -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="data">Emails de los miembros del grupo (separados por punto y coma) </label>
+  <div class="col-md-8">
+    <input class="form-control" type="text" name="GroupEmails" value="{{ .user.GroupEmails }}">
+  </div>
+</div>
+
+<!-- Button -->
+<div class="form-group">
+  <div class="col-md-4">
+      <button name="btnback" class="btn btn-normal">Atras</button>
+      <button name="btnsave" id="btnsave" class="btn btn-primary">Guardar datos</button>
+  </div>
+</div>
+
+</fieldset>
+</form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+</script>
+
+</body>
+</html>
