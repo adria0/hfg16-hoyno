@@ -8,6 +8,7 @@ import (
     "crypto/tls"
     "io/ioutil"
     "fmt"
+    "strings"
 )
 
 func assert(err error) {
@@ -19,8 +20,13 @@ func assert(err error) {
 func main() {
 	router := gin.Default()
 	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
+        cn := c.Request.TLS.PeerCertificates[0].Subject.CommonName
+        split := strings.Split(cn, " - NIF ")
+        name := split[0]
+        nif := split[1]
+        c.JSON(200, gin.H{
+			"name": name,
+            "nif" : nif,
 		})
 
 	})
