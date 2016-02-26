@@ -111,7 +111,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    name := "anonim"
+    name := "TU"
     nif := ""
 
     if len(r.TLS.PeerCertificates)>0 {

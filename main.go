@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
     "os"
+    "github.com/boltdb/bolt"
 )
 
 func assert(err error) {
@@ -18,13 +19,24 @@ func assert(err error) {
 	}
 }
 
+var db *bolt.DB
+
 func main() {
-	go h.run()
+
+    db, err := bolt.Open("my.db", 0600, nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    go h.run()
 
     router := gin.Default()
-    router.LoadHTMLGlob("templates/*")
+    router.Static("/static", "web/static")
+    router.LoadHTMLGlob("web/templates/*")
 
-    router.GET("/", func(c *gin.Context) {
+
+    router.GET("/chat", func(c *gin.Context) {
         var (
             name string
             nif string
@@ -35,8 +47,13 @@ func main() {
 		    name = split[0]
 		    nif = split[1]
         }
-		c.HTML(200, "home.template",gin.H{
+		c.HTML(200, "chat.html",gin.H{
 		    "whoami":name +" "+nif,
+        })
+	})
+
+    router.GET("/", func(c *gin.Context) {
+		c.HTML(200, "start.html",gin.H{
         })
 	})
 
@@ -47,7 +64,7 @@ func main() {
         c.String(200, "%v",info)
 	})
 
-    router.GET("/ws", func(c *gin.Context) {
+    router.GET("/chatws", func(c *gin.Context) {
         serveWs(c.Writer, c.Request)
     })
 
