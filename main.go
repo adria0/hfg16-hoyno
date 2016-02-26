@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+    "os"
 )
 
 func assert(err error) {
@@ -73,7 +74,7 @@ func main() {
 	server := &http.Server{
 		Handler:   router,
 		TLSConfig: tlsConfig,
-		Addr:      ":8443",
+		Addr:      ":"+os.Getenv("PORT"),
 	}
 	assert(server.ListenAndServeTLS("certs/localhost.pem", "certs/localhost.key"))
 }
