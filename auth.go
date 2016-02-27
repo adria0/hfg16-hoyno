@@ -20,10 +20,11 @@ type Cookie struct {
 	ID        string
 	anonymous bool
 	nick      string
+    team      string
 }
 
 var (
-	cookies = map[string]Cookie{}
+	cookies = map[string]*Cookie{}
 	mutex   = &sync.Mutex{}
 )
 
@@ -48,7 +49,6 @@ func initAuth() {
 		}
 
 	}()
-
 }
 
 func getSessionUserId(r *http.Request) *Cookie {
@@ -64,7 +64,7 @@ func getSessionUserId(r *http.Request) *Cookie {
 				delete(cookies, token)
 				return nil
 			}
-			return &cookie
+			return cookie
 		}
 		return nil
 
@@ -87,7 +87,7 @@ func setSessionFromAnonymous(c *gin.Context) string {
 	ID := "Random_user"
 
 	mutex.Lock()
-	cookies[token128] = Cookie{expires: expires, ID: ID, anonymous: true, nick: ID}
+	cookies[token128] = &Cookie{expires: expires, ID: ID, anonymous: true, nick: ID}
 	mutex.Unlock()
 
 	cookie := http.Cookie{Name: "token", Value: token128}
@@ -122,7 +122,7 @@ func setSessionFromTLS(c *gin.Context) string {
 	}
 
 	mutex.Lock()
-	cookies[token128] = Cookie{expires: expires, ID: ID, anonymous: false, nick: nick}
+	cookies[token128] = &Cookie{expires: expires, ID: ID, anonymous: false, nick: nick}
 	mutex.Unlock()
 
 	cookie := http.Cookie{Name: "token", Value: token128}

@@ -16,12 +16,6 @@ func initWeb(router *gin.Engine) {
 	router.LoadHTMLGlob("web/templates/*")
 
 	router.GET("/chat", func(c *gin.Context) {
-		/*
-		           var (
-		   			name string
-		   			nif  string
-		   		)
-		*/
 		cookie := getSessionUserId(c.Request)
 		c.HTML(200, "chat.html", gin.H{
 			"whoami":              cookie.nick,
