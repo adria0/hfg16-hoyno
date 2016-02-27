@@ -2,27 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
-
-var (
-	UserNameKey    = []byte{1}
-	PublicNameKey  = []byte{2}
-	EmailKey       = []byte{3}
-	GroupNameKey   = []byte{4}
-	GroupEmailsKey = []byte{5}
-)
-
-type User struct {
-	ID          string
-	UserName    string
-	PublicName  string
-	Email       string
-	GroupName   string
-	GroupEmails string
-}
 
 func buttonPressed(c *gin.Context, name string) bool {
 	return c.DefaultPostForm(name, "undefined") != "undefined"
@@ -61,30 +43,25 @@ func initWeb(router *gin.Engine) {
 		c.String(200, "%v", info)
 	})
 
+	router.POST("/config/chatstatus/:active", func(c *gin.Context) {
+		isActive := c.Param("active") == "on"
+		ID := getSessionUserId(c)
+		setChatStatus(ID, isActive)
+		c.String(200, "")
+	})
+
 	router.GET("/config", func(c *gin.Context) {
 		ID := getSessionUserId(c)
-		var user User
-
-		db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte(ID))
-			if b != nil {
-				user = User{
-					ID:          ID,
-					UserName:    string(b.Get(UserNameKey)),
-					PublicName:  string(b.Get(PublicNameKey)),
-					Email:       string(b.Get(EmailKey)),
-					GroupName:   string(b.Get(GroupNameKey)),
-					GroupEmails: string(b.Get(GroupEmailsKey)),
-				}
-			} else {
+        user, err := load(ID)
+        if err == ErrNotExists {
 				user = User{
 					ID:         ID,
 					UserName:   ID,
 					PublicName: "Falta nombre",
 				}
-			}
-			return nil
-		})
+				save(ID, user)
+                setChatStatus(ID,false)
+        }
 
 		fmt.Printf("%v", user)
 
@@ -103,19 +80,7 @@ func initWeb(router *gin.Engine) {
 			GroupName:   c.PostForm("GroupName"),
 			GroupEmails: c.PostForm("GroupEmails"),
 		}
-
-		db.Update(func(tx *bolt.Tx) error {
-			b, err := tx.CreateBucketIfNotExists([]byte(ID))
-			if err != nil {
-				return err
-			}
-			b.Put(UserNameKey, []byte(user.UserName))
-			b.Put(PublicNameKey, []byte(user.PublicName))
-			b.Put(EmailKey, []byte(user.Email))
-			b.Put(GroupNameKey, []byte(user.GroupName))
-			b.Put(GroupEmailsKey, []byte(user.GroupEmails))
-			return nil
-		})
+		save(ID, user)
 
 		c.HTML(200, "config.html", gin.H{
 			"user": user,

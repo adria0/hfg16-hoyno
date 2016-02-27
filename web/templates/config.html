@@ -7,7 +7,9 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.js"></script>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap3/bootstrap-switch.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   <link href='https://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" type="text/css"  href="/static/css/style.css">
@@ -26,8 +28,19 @@
 <form class="form-horizontal" method="post" action="/config">
 <fieldset>
 
+<legend>Chat</legend>
+
+
+<div class="form-group">
+  <div class="col-md-12">
+    <input type="checkbox" id="ChatActive" checked> 
+</div>
+</div>
+
 <!-- Form Name -->
 <legend>Mis datos</legend>
+
+<div class="bootstrap-switch-container" style="width: 372px; margin-left: -124px;"><span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 124px;">ON</span><span class="bootstrap-switch-label" style="width: 124px;">&nbsp;</span><span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 124px;">OFF</span><input id="switch-handleWidth" type="checkbox" data-handle-width="100"></div>
 
 <div class="form-group">
   <label class="col-md-4 control-label" for="data">Nombre interno</label>
@@ -77,8 +90,10 @@
 </div>
 
 <script>
-
-
+$("#ChatActive").bootstrapSwitch();
+$('#ChatActive').on('switchChange.bootstrapSwitch', function(event, state) {
+  alert(state)
+});
 </script>
 
 </body>
