@@ -33,7 +33,11 @@
 
 <div class="form-group">
   <div class="col-md-12">
-    <input type="checkbox" id="ChatActive" checked> 
+      <input type="checkbox" id="ChatActive"
+       {{if .user.ChatStatus}}
+          checked
+       {{end}}
+      > 
 </div>
 </div>
 
@@ -77,7 +81,6 @@
 <!-- Button -->
 <div class="form-group">
   <div class="col-md-4">
-      <button name="btnback" class="btn btn-normal">Atras</button>
       <button name="btnsave" id="btnsave" class="btn btn-primary">Guardar datos</button>
   </div>
 </div>
@@ -92,7 +95,14 @@
 <script>
 $("#ChatActive").bootstrapSwitch();
 $('#ChatActive').on('switchChange.bootstrapSwitch', function(event, state) {
-  alert(state)
+  var status
+  if (state == true) {
+    status = "on"
+  } else {
+    status = "off"
+  }
+  $.post( "/chatstatus/"+status, function( data ) {
+  });
 });
 </script>
 

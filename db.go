@@ -70,7 +70,21 @@ func load(ID string) (User, error) {
 	return user, err
 }
 
-func setChatStatus(ID string, status bool) error {
+func isUserChatActivated(ID string) bool {
+    status := false
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ID))
+		if b == nil {
+			return nil
+		}
+		chatStatus := b.Get(ChatStatusKey)
+	    status = chatStatus[0] == ChatON
+		return nil
+	})
+	return status
+}
+
+func setUserChatActivated(ID string, status bool) error {
 	var isActive []byte
 	if status {
 		isActive = []byte{1}

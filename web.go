@@ -43,10 +43,10 @@ func initWeb(router *gin.Engine) {
 		c.String(200, "%v", info)
 	})
 
-	router.POST("/config/chatstatus/:active", func(c *gin.Context) {
+	router.POST("/chatstatus/:active", func(c *gin.Context) {
 		isActive := c.Param("active") == "on"
 		ID := getSessionUserId(c)
-		setChatStatus(ID, isActive)
+		setUserChatActivated(ID, isActive)
 		c.String(200, "")
 	})
 
@@ -58,9 +58,10 @@ func initWeb(router *gin.Engine) {
 					ID:         ID,
 					UserName:   ID,
 					PublicName: "Falta nombre",
-				}
+				    ChatStatus: false,
+                }
 				save(ID, user)
-                setChatStatus(ID,false)
+                setUserChatActivated(ID,false)
         }
 
 		fmt.Printf("%v", user)
@@ -79,9 +80,9 @@ func initWeb(router *gin.Engine) {
 			Email:       c.PostForm("Email"),
 			GroupName:   c.PostForm("GroupName"),
 			GroupEmails: c.PostForm("GroupEmails"),
-		}
+        }
 		save(ID, user)
-
+        user.ChatStatus = isUserChatActivated(ID)
 		c.HTML(200, "config.html", gin.H{
 			"user": user,
 		})
