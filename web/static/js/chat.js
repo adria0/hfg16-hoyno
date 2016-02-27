@@ -49,7 +49,7 @@
     }
 
     $("#configure").click(function() {
-        window.open("/configure");
+        window.open("/config");
     });
 
 

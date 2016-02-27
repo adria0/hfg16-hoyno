@@ -43,8 +43,8 @@ type connection struct {
 	// Name
 	nick string
 
-    // ID of peer
-    peerID string
+	// ID of peer
+	peerID string
 }
 
 // readPump pumps messages from the websocket connection to the hub.

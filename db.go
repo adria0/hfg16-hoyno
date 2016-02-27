@@ -34,10 +34,16 @@ type User struct {
 
 func save(ID string, user User) error {
 	return db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(ID))
+        if tx.Bucket([]byte(ID)) == nil {
+            b, err := tx.CreateBucketIfNotExists([]byte("users"))
+            if err != nil {
+                return err
+            }
+		    b.Put([]byte(ID), nil)
+        }
+        b, err := tx.CreateBucketIfNotExists([]byte(ID))
 		if err != nil {
 			return err
-
 		}
 		b.Put(UserNameKey, []byte(user.UserName))
 		b.Put(PublicNameKey, []byte(user.PublicName))
@@ -45,8 +51,22 @@ func save(ID string, user User) error {
 		b.Put(GroupNameKey, []byte(user.GroupName))
 		b.Put(GroupEmailsKey, []byte(user.GroupEmails))
 		return nil
-
 	})
+}
+
+func availableTeams() ([]string, error) {
+	teams := make([]string, 0)
+	err := db.View(func(tx *bolt.Tx) error {
+		users := tx.Bucket([]byte("users"))
+		uc := users.Cursor()
+		for k, _ := uc.First(); k != nil; k, _ = uc.Next() {
+		    user := tx.Bucket(k)
+            team := user.Get(GroupNameKey)
+            teams = append(teams, string(team))
+		}
+		return nil
+	})
+	return teams, err
 }
 
 func load(ID string) (User, error) {

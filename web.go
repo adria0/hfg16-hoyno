@@ -29,7 +29,10 @@ func initWeb(router *gin.Engine) {
 			return
 		}
 		setSessionFromAnonymous(c)
-		c.HTML(200, "start.html", gin.H{})
+        teams, _ := availableTeams()
+        c.HTML(200, "start.html", gin.H{
+            "teams" : teams,
+        })
 	})
 
 	router.GET("/info", func(c *gin.Context) {
@@ -82,5 +85,7 @@ func initWeb(router *gin.Engine) {
 		c.HTML(200, "config.html", gin.H{
 			"user": user,
 		})
+        at,_ := availableTeams()
+        fmt.Printf("AVAILAVLE TEAMS: [%v]\n",at)
 	})
 }

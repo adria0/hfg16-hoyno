@@ -13,23 +13,29 @@
     <link href="static/css/bootstrap.min.css" rel="stylesheet">
     <link href="static/css/style.css" rel="stylesheet">
 
+    <link href='https://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css"  href="/static/css/style.css">
+
+
   </head>
   <body>
 
     <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-12">
-			<h2>
+       <h1 class="logo">HoyNO</h1>
+			<h4>
 				Hola! Por ser el primer dia puedes escoger tu superequipo de ayudantes :)
                 Qual te gusta mas?
-			</h2>
+			</h4>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-12">
                 <table class="table">
-                <tr><td><button id="next" type="button" class="btn btn-success">Los super kung fu pandas!</button></td></tr>
-                <tr><td><button type="button" class="btn btn-success">Megaperezosos</button></td></tr>
+{{ range $key := .teams }}
+                <tr><td><button id="next" type="button" class="btn  btn-xlg btn-success">{{ $key }}</button></td></tr>
+{{ end }}
                 </table>
 		</div>
 	</div>

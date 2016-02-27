@@ -20,7 +20,7 @@ type Cookie struct {
 	ID        string
 	anonymous bool
 	nick      string
-    team      string
+	team      string
 }
 
 var (
@@ -80,14 +80,22 @@ func getSessionUserId(r *http.Request) *Cookie {
 }
 
 func setSessionFromAnonymous(c *gin.Context) string {
-	token128 := fmt.Sprintf("%x%x%x%x",
-		rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32())
-	expires := time.Now().Unix() + 7*24*3600
 
-	ID := "Random_user"
+    r1 := rand.Uint32()
+    token128 := fmt.Sprintf("%x%x%x%x",
+		r1, rand.Uint32(), rand.Uint32(), rand.Uint32())
+
+    expires := time.Now().Unix() + 365*7*24*3600
+
+	ID := token128
+
+    names := []string{"Arbol","Pierda","Rio"}
+    surenames := []string{"Rojo","Verde","Azul","Amarillo","Fuerte"}
+
+    nick := names[r1%uint32(len(names))]+"-"+surenames[r1%uint32(len(surenames))]
 
 	mutex.Lock()
-	cookies[token128] = &Cookie{expires: expires, ID: ID, anonymous: true, nick: ID}
+	cookies[token128] = &Cookie{expires: expires, ID: ID, anonymous: true, nick: nick}
 	mutex.Unlock()
 
 	cookie := http.Cookie{Name: "token", Value: token128}
