@@ -48,5 +48,9 @@
         output.innerHTML = '<p><span>' +  msg + '</span></p>' + output.innerHTML;
     }
 
+    $("#configure").click(function() {
+        window.open("/configure");
+    });
+
 
 })();

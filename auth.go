@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	//    "log"
 )
 
 const (
@@ -15,8 +16,10 @@ const (
 )
 
 type Cookie struct {
-	expires int64
-	ID      string
+	expires   int64
+	ID        string
+	anonymous bool
+	nick      string
 }
 
 var (
@@ -48,9 +51,9 @@ func initAuth() {
 
 }
 
-func getSessionUserId(c *gin.Context) string {
+func getSessionUserId(r *http.Request) *Cookie {
 
-	validSessionUserId := func(token string) string {
+	validSessionUserId := func(token string) *Cookie {
 		now := time.Now().Unix()
 
 		mutex.Lock()
@@ -59,44 +62,71 @@ func getSessionUserId(c *gin.Context) string {
 		if cookie, exists := cookies[token]; exists {
 			if now > cookie.expires {
 				delete(cookies, token)
-				return Anonymous
+				return nil
 			}
-			return cookie.ID
+			return &cookie
 		}
-		return Anonymous
+		return nil
 
 	}
 
-	for _, cookie := range c.Request.Cookies() {
+	for _, cookie := range r.Cookies() {
 		if cookie.Name == "token" {
 			return validSessionUserId(cookie.Value)
 		}
 
 	}
-	return Anonymous
+	return nil
 }
 
-func setSessionUserId(c *gin.Context) string {
-
-	if len(c.Request.TLS.PeerCertificates) == 0 {
-		return Anonymous
-	}
-
-	cn := c.Request.TLS.PeerCertificates[0].Subject.CommonName
-	split := strings.Split(cn, " - NIF ")
-	ID := "NIF" + split[1]
-
+func setSessionFromAnonymous(c *gin.Context) string {
 	token128 := fmt.Sprintf("%x%x%x%x",
 		rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32())
 	expires := time.Now().Unix() + 7*24*3600
 
+	ID := "Random_user"
+
 	mutex.Lock()
-	cookies[token128] = Cookie{expires: expires, ID: ID}
+	cookies[token128] = Cookie{expires: expires, ID: ID, anonymous: true, nick: ID}
 	mutex.Unlock()
 
 	cookie := http.Cookie{Name: "token", Value: token128}
 	http.SetCookie(c.Writer, &cookie)
 
 	return ID
+}
 
+func setSessionFromTLS(c *gin.Context) string {
+
+	if len(c.Request.TLS.PeerCertificates) == 0 {
+		fmt.Println("------ user ANONIM ------")
+		return Anonymous
+	}
+
+	cn := c.Request.TLS.PeerCertificates[0].Subject.CommonName
+	split := strings.Split(cn, " - NIF ")
+	ID := "NIF" + split[1]
+	nick := ID
+
+	token128 := fmt.Sprintf("%x%x%x%x",
+		rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32())
+	expires := time.Now().Unix() + 7*24*3600
+
+	user, err := load(ID)
+	if err == nil {
+		fmt.Printf("------ user: %v ------", user)
+		nick = user.PublicName
+	} else {
+
+		fmt.Printf("------ user: %v ------", err)
+	}
+
+	mutex.Lock()
+	cookies[token128] = Cookie{expires: expires, ID: ID, anonymous: false, nick: nick}
+	mutex.Unlock()
+
+	cookie := http.Cookie{Name: "token", Value: token128}
+	http.SetCookie(c.Writer, &cookie)
+
+	return ID
 }

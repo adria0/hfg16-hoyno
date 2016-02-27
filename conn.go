@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"strings"
+	//	"strings"
 	"time"
 )
 
@@ -42,9 +42,6 @@ type connection struct {
 
 	// Name
 	nick string
-
-	// Authentication
-	nif string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -111,17 +108,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := "TU"
-	nif := ""
+	cookie := getSessionUserId(r)
 
-	if len(r.TLS.PeerCertificates) > 0 {
-		cn := r.TLS.PeerCertificates[0].Subject.CommonName
-		split := strings.Split(cn, " - NIF ")
-		name = strings.Replace(split[0], "NOMBRE ", "", 1)
-		nif = split[1]
-	}
-
-	c := &connection{send: make(chan []byte, 256), ws: ws, nick: name, nif: nif}
+	c := &connection{send: make(chan []byte, 256), ws: ws, nick: cookie.nick}
 	h.register <- c
 	go c.writePump()
 	c.readPump()

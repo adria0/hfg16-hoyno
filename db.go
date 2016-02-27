@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/boltdb/bolt"
 )
 
@@ -38,7 +39,7 @@ func save(ID string, user User) error {
 			return err
 
 		}
-        b.Put(UserNameKey, []byte(user.UserName))
+		b.Put(UserNameKey, []byte(user.UserName))
 		b.Put(PublicNameKey, []byte(user.PublicName))
 		b.Put(EmailKey, []byte(user.Email))
 		b.Put(GroupNameKey, []byte(user.GroupName))
@@ -49,10 +50,13 @@ func save(ID string, user User) error {
 }
 
 func load(ID string) (User, error) {
+	fmt.Printf("----- loading %v ----- \n", ID)
 	var user User
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(ID))
 		if b == nil {
+
+			fmt.Printf("----- loading %v NONE----- \n", ID)
 			return ErrNotExists
 		}
 		chatStatus := b.Get(ChatStatusKey)
@@ -71,14 +75,14 @@ func load(ID string) (User, error) {
 }
 
 func isUserChatActivated(ID string) bool {
-    status := false
+	status := false
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(ID))
 		if b == nil {
 			return nil
 		}
 		chatStatus := b.Get(ChatStatusKey)
-	    status = chatStatus[0] == ChatON
+		status = chatStatus[0] == ChatON
 		return nil
 	})
 	return status

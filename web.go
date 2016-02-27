@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"strings"
+	//	"strings"
 )
 
 func buttonPressed(c *gin.Context, name string) bool {
@@ -16,23 +16,25 @@ func initWeb(router *gin.Engine) {
 	router.LoadHTMLGlob("web/templates/*")
 
 	router.GET("/chat", func(c *gin.Context) {
-		var (
-			name string
-			nif  string
-		)
-		if len(c.Request.TLS.PeerCertificates) > 0 {
-			cn := c.Request.TLS.PeerCertificates[0].Subject.CommonName
-			split := strings.Split(cn, " - NIF ")
-			name = split[0]
-			nif = split[1]
-		}
+		/*
+		           var (
+		   			name string
+		   			nif  string
+		   		)
+		*/
+		cookie := getSessionUserId(c.Request)
 		c.HTML(200, "chat.html", gin.H{
-			"whoami": name + " " + nif,
+			"whoami":              cookie.nick,
+			"IsAuthenticatedUser": !cookie.anonymous,
 		})
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		setSessionUserId(c)
+		if setSessionFromTLS(c) != Anonymous {
+			c.Redirect(307, "/chat")
+			return
+		}
+		setSessionFromAnonymous(c)
 		c.HTML(200, "start.html", gin.H{})
 	})
 
@@ -45,24 +47,24 @@ func initWeb(router *gin.Engine) {
 
 	router.POST("/chatstatus/:active", func(c *gin.Context) {
 		isActive := c.Param("active") == "on"
-		ID := getSessionUserId(c)
+		ID := getSessionUserId(c.Request).ID
 		setUserChatActivated(ID, isActive)
 		c.String(200, "")
 	})
 
 	router.GET("/config", func(c *gin.Context) {
-		ID := getSessionUserId(c)
-        user, err := load(ID)
-        if err == ErrNotExists {
-				user = User{
-					ID:         ID,
-					UserName:   ID,
-					PublicName: "Falta nombre",
-				    ChatStatus: false,
-                }
-				save(ID, user)
-                setUserChatActivated(ID,false)
-        }
+		ID := getSessionUserId(c.Request).ID
+		user, err := load(ID)
+		if err == ErrNotExists {
+			user = User{
+				ID:         ID,
+				UserName:   ID,
+				PublicName: "Falta nombre",
+				ChatStatus: false,
+			}
+			save(ID, user)
+			setUserChatActivated(ID, false)
+		}
 
 		fmt.Printf("%v", user)
 
@@ -72,7 +74,7 @@ func initWeb(router *gin.Engine) {
 	})
 
 	router.POST("/config", func(c *gin.Context) {
-		ID := getSessionUserId(c)
+		ID := getSessionUserId(c.Request).ID
 		user := User{
 			ID:          ID,
 			UserName:    c.PostForm("UserName"),
@@ -80,9 +82,9 @@ func initWeb(router *gin.Engine) {
 			Email:       c.PostForm("Email"),
 			GroupName:   c.PostForm("GroupName"),
 			GroupEmails: c.PostForm("GroupEmails"),
-        }
+		}
 		save(ID, user)
-        user.ChatStatus = isUserChatActivated(ID)
+		user.ChatStatus = isUserChatActivated(ID)
 		c.HTML(200, "config.html", gin.H{
 			"user": user,
 		})
